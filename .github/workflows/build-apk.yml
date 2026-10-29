@@ -1,0 +1,40 @@
+name: Crear APK de Magneto Secreto
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'MagnetoSecreto_proyecto_android.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Descomprimir proyecto
+        run: |
+          unzip -q MagnetoSecreto_proyecto_android.zip -d source
+
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Compilar aplicación
+        working-directory: source/MagnetoSecreto
+        run: gradle --no-daemon assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Magneto-Secreto-APK
+          path: source/MagnetoSecreto/app/build/outputs/apk/debug/app-debug.apk
